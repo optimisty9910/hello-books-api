@@ -26,7 +26,7 @@ def get_all_books():
 
     return books_response
 
-@books_bp.get("/<book_id>")
+@books_bp.get("/<int:book_id>")
 def get_one_book(book_id):
     book = validate_book(book_id)
 
