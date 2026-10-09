@@ -29,8 +29,11 @@ This tells the route to treat a URI the same whether or not it ends in `/`.
 Accepting either variation can make using our API a little easier for clients.
 """
 
-""" @books_bp.get("")
+@books_bp.get("")
 def get_all_books():
+    query = db.select(Book).order_by(Book.id)
+    books = db.session.scalars(query)
+
     books_response = []
     for book in books:
         books_response.append(
@@ -41,7 +44,9 @@ def get_all_books():
             }
         )
 
-    return books_response
+    return books_response, 200
+
+"""
 
 @books_bp.get("/<int:book_id>")
 def get_one_book(book_id):
