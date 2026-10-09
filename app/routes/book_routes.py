@@ -1,7 +1,24 @@
-from flask import Blueprint, abort, make_response
-from ..models.book import books
+from flask import Blueprint, abort, make_response, request
+from ..models.book import Book
+from ..db import db
 
 books_bp = Blueprint("books_bp", __name__, url_prefix="/books")
+
+@books_bp.post("")
+def create_book():
+    request_body = request.get_json()
+    title = request_body["title"]
+    description = request_body["description"]
+
+    new_book = Book()
+    new_book.title = title
+    new_book.description = description
+    db.session.add(new_book)
+    db.session.commit()
+
+    response = {"id": new_book.id, "title": new_book.title, "description": new_book.description}
+
+    return response, 201
 
 """
 Blueprints and Routes are Sensitive to /
@@ -12,7 +29,7 @@ This tells the route to treat a URI the same whether or not it ends in `/`.
 Accepting either variation can make using our API a little easier for clients.
 """
 
-@books_bp.get("")
+""" @books_bp.get("")
 def get_all_books():
     books_response = []
     for book in books:
@@ -48,4 +65,4 @@ def validate_book(book_id):
             return book
 
     response = {"message": f"book {book_id} not found"}
-    abort(make_response(response, 404))
+    abort(make_response(response, 404)) """
