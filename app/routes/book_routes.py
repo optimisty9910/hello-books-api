@@ -1,4 +1,4 @@
-from flask import Blueprint, abort, make_response, request
+from flask import Blueprint, abort, make_response, request, Response
 from ..models.book import Book
 from ..db import db
 
@@ -66,11 +66,23 @@ def validate_book(book_id):
     
     query = db.select(Book).where(Book.id == book_id)
     book = db.session.scalar(query)
-
-    response = {"message": f"book {book_id} not found"}
-    abort(make_response(response, 404))
+    if not book:
+        response = {"message": f"book {book_id} not found"}
+        abort(make_response(response, 404))
     
     return book
+
+@books_bp.put("/<int:book_id>")
+def update_book(book_id):
+    book = validate_book(book_id)
+    request_body = request.get_json()
+
+    book.title = request_body["title"]
+    book.description = request_body["description"]
+
+    db.session.commit()
+
+    return Response(status=204, mimetype="application/json")
 
 """
 
