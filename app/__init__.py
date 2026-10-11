@@ -1,15 +1,19 @@
-from flask import Flask
+from flask import Flask, config
 #from .routes.hello_world_routes import hello_world_bp
 from .db import db, migrate
 from .models import book
 from .routes.book_routes import books_bp
+import os
 
-
-def create_app():
+def create_app(config=None):
     app = Flask(__name__)
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://postgres:postgres@localhost:5432/hello_books_development"
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    if config:
+        # Merge 'config' into the app's configuration to override the app's default settings
+        app.config.update(config)
 
     db.init_app(app)
     migrate.init_app(app, db)
