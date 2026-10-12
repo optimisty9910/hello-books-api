@@ -20,4 +20,8 @@ class Book(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     title: Mapped[str]
     description: Mapped[str]
-    
+
+    @classmethod
+    def from_dict(cls, book_dict):
+        new_book = cls(title=book_dict["title"], description=book_dict["description"])
+        return new_book
