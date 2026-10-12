@@ -10,7 +10,7 @@ def create_book():
 
     try:
         new_book = Book.from_dict(request_body)
-        
+
     except KeyError as error:
         response = {"message": f"Invalid request: missing {error.args[0]}"}
         abort(make_response(response, 400))
@@ -18,9 +18,7 @@ def create_book():
     db.session.add(new_book)
     db.session.commit()
 
-    response = {"id": new_book.id, "title": new_book.title, "description": new_book.description}
-
-    return response, 201
+    return new_book.to_dict(), 201
 
 """
 Blueprints and Routes are Sensitive to /
@@ -49,25 +47,15 @@ def get_all_books():
 
     books_response = []
     for book in books:
-        books_response.append(
-            {
-                "id": book.id, 
-                "title": book.title, 
-                "description": book.description
-            }
-        )
+        books_response.append(book.to_dict())
 
     return books_response, 200
 
-@books_bp.get("/<int:book_id>")
+@books_bp.get("/<book_id>")
 def get_one_book(book_id):
     book = validate_book(book_id)
 
-    return {
-        "id": book.id,
-        "title": book.title,
-        "description": book.description
-    }, 200
+    return book.to_dict(), 200
 
 
 def validate_book(book_id):
@@ -85,7 +73,7 @@ def validate_book(book_id):
     
     return book
 
-@books_bp.put("/<int:book_id>")
+@books_bp.put("/<book_id>")
 def update_book(book_id):
     book = validate_book(book_id)
     request_body = request.get_json()
@@ -97,7 +85,7 @@ def update_book(book_id):
 
     return Response(status=204, mimetype="application/json")
 
-@books_bp.delete("/<int:book_id>")
+@books_bp.delete("/<book_id>")
 def delete_book(book_id):
     book = validate_book(book_id)
 
