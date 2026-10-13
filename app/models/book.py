@@ -32,13 +32,19 @@ class Book(db.Model):
     author: Mapped[Optional["Author"]] = relationship(back_populates="books")
     
     def to_dict(self):
-        return {
-            "id": self.id,
-            "title": self.title,
-            "description": self.description
-        }
+        book = {}
+        book["id"] = self.id
+        book["title"] = self.title
+        book["description"] = self.description
+
+        if self.author:
+            book["author"] = self.author.name
+
+        return book
 
     @classmethod
     def from_dict(cls, book_dict):
-        new_book = cls(title=book_dict["title"], description=book_dict["description"])
+        # Use get() to fetch values that could be undefined to avoid raising an error
+        author_id = book_dict.get("author_id")
+        new_book = cls(title=book_dict["title"], description=book_dict["description"], author_id=author_id)
         return new_book
