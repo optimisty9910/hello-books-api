@@ -16,10 +16,15 @@ def test_validate_model_invalid_id(two_saved_books):
     # Act & Assert
     # Calling `validate_model` without being invoked by a route will
     # cause an `HTTPException` when an `abort` statement is reached 
-    with pytest.raises(HTTPException):
-        book = validate_model(Book, "3")
+    with pytest.raises(HTTPException) as error:
+        book = validate_model(Book, "cat")
+
+    assert error.value.response.status == "400 BAD REQUEST"
 
 def test_validate_model_not_found(two_saved_books):
     # Act & Assert
-    with pytest.raises(HTTPException):
-        book = validate_model(Book, "cat")
+    with pytest.raises(HTTPException) as error:
+        book = validate_model(Book, "3")
+
+    assert error.value.response.status == "404 NOT FOUND"
+

@@ -46,9 +46,7 @@ def get_all_books():
     
     books = db.session.scalars(query)
 
-    books_response = []
-    for book in books:
-        books_response.append(book.to_dict())
+    books_response = [book.to_dict() for book in books]
 
     return books_response, 200
 
