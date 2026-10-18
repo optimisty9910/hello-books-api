@@ -3,24 +3,14 @@ from flask import Blueprint, abort, make_response, request, Response
 from app.models.book import Book
 from ..models.author import Author
 from ..db import db
-from .route_utilities import validate_model
+from .route_utilities import create_model, delete_model, update_model, validate_model, get_models_with_filters
 
 bp = Blueprint("authors_bp", __name__, url_prefix="/authors")
 
 @bp.post("")
 def create_author():
     request_body = request.get_json()
-
-    try:
-        new_author = Author.from_dict(request_body)
-
-    except KeyError as error:
-        response = {"message": f"Invalid request: missing {error.args[0]}"}
-        abort(make_response(response, 400))
-
-    db.session.add(new_author)
-    db.session.commit()
-    return make_response(new_author.to_dict(), 201)
+    return create_model(Author, request_body)
 
 @bp.post("/<author_id>/books")
 def create_book_with_author(author_id):
@@ -28,32 +18,11 @@ def create_book_with_author(author_id):
     request_body = request.get_json()
     request_body["author_id"] = author_id
 
-    try:
-        new_book = Book.from_dict(request_body)
-        new_book.author = author
-
-    except KeyError as error:
-        response = {"message": f"Invalid request: missing {error.args[0]}"}
-        abort(make_response(response, 400))
-
-    db.session.add(new_book)
-    db.session.commit()
-    return make_response(new_book.to_dict(), 201)
+    return create_model(Book, request_body)
 
 @bp.get("")
 def get_all_authors():
-    query = db.select(Author)
-
-    name_param = request.args.get("name")
-
-    if name_param:
-        query = query.where(Author.name.ilike(f"%{name_param}%"))
-
-    authors = db.session.scalars(query.order_by(Author.id))
-
-    authors_response = [author.to_dict() for author in authors]
-
-    return make_response(authors_response, 200)
+    return get_models_with_filters(Author, request.args)
 
 @bp.get("/<author_id>")
 def get_author_by_id(author_id):
@@ -68,18 +37,8 @@ def get_books_by_author(author_id):
 
 @bp.put("/<author_id>")
 def update_author(author_id):
-    author = validate_model(Author, author_id)
-    request_body = request.get_json()
-
-    if "name" in request_body:
-        author.name = request_body["name"]
-
-    db.session.commit()
-    return Response(status=204, mimetype="application/json")
-
+    return update_model(Author, author_id, request.get_json())
+    
 @bp.delete("/<author_id>")
 def delete_author(author_id):
-    author = validate_model(Author, author_id)
-    db.session.delete(author)
-    db.session.commit()
-    return Response(status=204, mimetype="application/json")
+    return delete_model(Author, author_id)

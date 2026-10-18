@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app import db
+from typing import Optional
 
 class Author(db.Model):
     __tablename__ = 'authors'

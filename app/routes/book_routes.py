@@ -2,25 +2,14 @@ from flask import Blueprint, abort, make_response, request, Response
 from ..models.book import Book
 from ..models.author import Author
 from ..db import db
-from .route_utilities import validate_model
+from .route_utilities import create_model, delete_model, update_model, validate_model, get_models_with_filters
 
 bp = Blueprint("books_bp", __name__, url_prefix="/books")
 
 @bp.post("")
 def create_book():
     request_body = request.get_json()
-
-    try:
-        new_book = Book.from_dict(request_body)
-
-    except KeyError as error:
-        response = {"message": f"Invalid request: missing {error.args[0]}"}
-        abort(make_response(response, 400))
-
-    db.session.add(new_book)
-    db.session.commit()
-
-    return new_book.to_dict(), 201
+    return create_model(Book, request_body)
 
 """
 Blueprints and Routes are Sensitive to /
@@ -33,23 +22,7 @@ Accepting either variation can make using our API a little easier for clients.
 
 @bp.get("")
 def get_all_books():
-    query = db.select(Book)
-    title_param = request.args.get("title")
-    description_param = request.args.get("description")
-    
-    if title_param:
-        query = query.where(Book.title.ilike(f"%{title_param}%"))
-    
-    if description_param:
-        query = query.where(Book.description.ilike(f"%{description_param}%"))
-    
-    query = query.order_by(Book.id)
-    
-    books = db.session.scalars(query)
-
-    books_response = [book.to_dict() for book in books]
-
-    return books_response, 200
+    return get_models_with_filters(Book, request.args)
 
 @bp.get("/<book_id>")
 def get_one_book(book_id):
@@ -60,35 +33,11 @@ def get_one_book(book_id):
 
 @bp.put("/<book_id>")
 def update_book(book_id):
-    book = validate_model(Book, book_id)
-    request_body = request.get_json()
-
-    if "title" in request_body:
-        book.title = request_body["title"]
-
-    if "description" in request_body:
-        book.description = request_body["description"]
-
-    if "author_id" in request_body:
-        author_id = request_body["author_id"]
-        if author_id is not None:
-            author = validate_model(Author, author_id)
-            book.author = author
-        else:
-            book.author = None
-
-    db.session.commit()
-
-    return Response(status=204, mimetype="application/json")
+    return update_model(Book, book_id, request.get_json())
 
 @bp.delete("/<book_id>")
 def delete_book(book_id):
-    book = validate_model(Book, book_id)
-
-    db.session.delete(book)
-    db.session.commit()
-
-    return Response(status=204, mimetype="application/json")
+    return delete_model(Book, book_id)
 
 """
 
