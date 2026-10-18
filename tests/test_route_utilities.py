@@ -1,7 +1,7 @@
 from werkzeug.exceptions import HTTPException
 from app.models.author import Author
 from app.models.book import Book
-from app.routes.route_utilities import create_model, get_models_with_filters, validate_model
+from app.routes.route_utilities import create_model, delete_model, get_models_with_filters, update_model, validate_model
 import pytest
 
 def test_validate_model(two_saved_books):
@@ -83,3 +83,53 @@ def test_get_models_with_filters_no_matching_book(two_saved_books):
     assert status == 200
     assert isinstance(books, list)
     assert len(books) == 0
+
+def test_update_model_book(two_saved_books):
+    # Act
+    response = update_model(Book, 1, {
+        "title": "Updated Book",
+        "description": "An updated book"
+    })
+
+    # Assert
+    assert response.status_code == 204
+    assert response.content_length is None
+
+def test_update_model_with_missing_id(two_saved_books):
+    # Act & Assert
+    with pytest.raises(HTTPException) as error:
+        update_model(Book, 3, {
+            "title": "Missing ID Book"
+        })
+
+    assert error.value.response.status == "404 NOT FOUND"
+
+def test_update_model_with_invalid_id(two_saved_books):
+    # Act & Assert
+    with pytest.raises(HTTPException) as error:
+        update_model(Book, "invalid_id", {
+            "title": "Invalid ID Book"
+        })
+
+    assert error.value.response.status == "400 BAD REQUEST"
+
+def test_delete_model_book(two_saved_books):
+    # Act
+    response = delete_model(Book, 1)
+
+    # Assert
+    assert response.status == "204 NO CONTENT"
+
+def test_delete_model_with_missing_id(two_saved_books):
+    # Act & Assert
+    with pytest.raises(HTTPException) as error:
+        delete_model(Book, 3)
+
+    assert error.value.response.status == "404 NOT FOUND"
+
+def test_delete_model_with_invalid_id(two_saved_books):
+    # Act & Assert
+    with pytest.raises(HTTPException) as error:
+        delete_model(Book, "invalid_id")
+
+    assert error.value.response.status == "400 BAD REQUEST"
