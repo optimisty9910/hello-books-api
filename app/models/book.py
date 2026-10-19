@@ -5,6 +5,7 @@ from app import db
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .author import Author
+    from .genre import Genre
 
 class Book(db.Model):
     __tablename__ = 'books'
@@ -17,12 +18,14 @@ class Book(db.Model):
     # just as Mapped[str] declares a required string column.
     author_id: Mapped[Optional[int]] = mapped_column(ForeignKey("authors.id"))
     author: Mapped[Optional["Author"]] = relationship(back_populates="books")
+    genres: Mapped[list["Genre"]] = relationship(secondary="books_genres", back_populates="books")
     
     def to_dict(self):
         book = {}
         book["id"] = self.id
         book["title"] = self.title
         book["description"] = self.description
+        book["genres"] = [genre.name for genre in self.genres]
 
         if self.author:
             book["author"] = self.author.name
