@@ -1,8 +1,6 @@
-from flask import Blueprint, abort, make_response, request, Response
-
+from flask import Blueprint, request
 from app.models.book import Book
 from ..models.author import Author
-from ..db import db
 from .route_utilities import create_model, delete_model, update_model, validate_model, get_models_with_filters
 
 bp = Blueprint("authors_bp", __name__, url_prefix="/authors")
@@ -14,7 +12,7 @@ def create_author():
 
 @bp.post("/<author_id>/books")
 def create_book_with_author(author_id):
-    author = validate_model(Author, author_id)
+    validate_model(Author, author_id)
     request_body = request.get_json()
     request_body["author_id"] = author_id
 

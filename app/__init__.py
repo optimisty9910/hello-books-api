@@ -1,8 +1,8 @@
 from flask import Flask
-#from .routes.hello_world_routes import hello_world_bp
 from .db import db, migrate
 from .routes.book_routes import bp as book_bp
 from .routes.author_routes import bp as author_bp
+from .routes.genre_route import bp as genre_bp
 import os
 
 def create_app(config=None):
@@ -19,8 +19,8 @@ def create_app(config=None):
     migrate.init_app(app, db)
 
     # Register Blueprints here
-    #app.register_blueprint(hello_world_bp)
     app.register_blueprint(book_bp)
     app.register_blueprint(author_bp)
+    app.register_blueprint(genre_bp)
 
     return app

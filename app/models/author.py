@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app import db
-from typing import Optional
 
 class Author(db.Model):
     __tablename__ = 'authors'
@@ -10,10 +9,10 @@ class Author(db.Model):
     books: Mapped[list["Book"]] = relationship(back_populates="author")
 
     def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name
-        }
+        author = {}
+        author["id"] = self.id
+        author["name"] = self.name
+        return author
 
     @classmethod
     def from_dict(cls, author_dict):
