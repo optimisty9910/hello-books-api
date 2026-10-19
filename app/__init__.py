@@ -1,6 +1,6 @@
 from flask import Flask
 from .db import db, migrate
-from .models.books_genres import BookGenre
+from .models import book, author, genre, books_genres
 from .routes.book_routes import bp as book_bp
 from .routes.author_routes import bp as author_bp
 from .routes.genre_route import bp as genre_bp

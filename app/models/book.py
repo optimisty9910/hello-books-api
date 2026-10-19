@@ -25,16 +25,29 @@ class Book(db.Model):
         book["id"] = self.id
         book["title"] = self.title
         book["description"] = self.description
-        book["genres"] = [genre.name for genre in self.genres]
 
         if self.author:
             book["author"] = self.author.name
 
+        if self.genres:
+            book["genres"] = [genre.name for genre in self.genres]
+
         return book
+
+    def update_book(self, book_dict):
+        self.title = book_dict.get("title", self.title)
+        self.description = book_dict.get("description", self.description)
+        self.author_id = book_dict.get("author_id", self.author_id)
+        self.genres = book_dict.get("genres", self.genres)
 
     @classmethod
     def from_dict(cls, book_dict):
         # Use get() to fetch values that could be undefined to avoid raising an error
         author_id = book_dict.get("author_id")
-        new_book = cls(title=book_dict["title"], description=book_dict["description"], author_id=author_id)
+        new_book = cls(
+            title=book_dict["title"], 
+            description=book_dict["description"], 
+            author_id=author_id,
+            genres=book_dict.get("genres", []),
+            )
         return new_book

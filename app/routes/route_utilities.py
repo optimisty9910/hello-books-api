@@ -9,12 +9,12 @@ def validate_model(cls, model_id):
         abort(make_response(response, 400))
     
     query = db.select(cls).where(cls.id == model_id)
-    book = db.session.scalar(query)
-    if not book:
+    model = db.session.scalar(query)
+    if not model:
         response = {"message": f"{cls.__name__} {model_id} not found"}
         abort(make_response(response, 404))
     
-    return book
+    return model
 
 def create_model(cls, model_data):
     try:

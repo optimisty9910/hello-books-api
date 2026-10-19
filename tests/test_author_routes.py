@@ -40,6 +40,18 @@ def test_get_one_author_with_invalid_id(client, two_saved_authors):
     assert response.status_code == 400
     assert response.get_json() == {"message": "Author abc invalid"}
 
+def test_get_books_by_author(client, two_saved_books, two_authors_with_two_books):
+    response = client.get("/authors/1/books")
+    assert response.status_code == 200
+    assert response.get_json() == [
+        {"id": 3, "title": "Desert Book", "description": "Sands all around", "author": "John Doe"}
+    ]
+
+def test_get_books_by_author_with_no_books(client, two_saved_authors, two_saved_books):
+    response = client.get("/authors/1/books")
+    assert response.status_code == 200
+    assert response.get_json() == []
+
 def test_create_one_author(client):
     response = client.post("/authors", json={"name": "Alice Johnson"})
     assert response.status_code == 201
@@ -54,6 +66,21 @@ def test_create_one_author_with_extra_keys(client):
     response = client.post("/authors", json={"name": "Alice Johnson", "age": 30})
     assert response.status_code == 201
     assert response.get_json() == {"id": 1, "name": "Alice Johnson"}
+
+def test_create_book_with_author(client, two_saved_authors):
+    response = client.post("/authors/1/books", json={"title": "Desert Book", "description": "Sands all around"})
+    assert response.status_code == 201
+    assert response.get_json() == {"id": 1, "title": "Desert Book", "description": "Sands all around", "author": "John Doe"}
+
+def test_create_book_with_nonexistant_author(client):
+    response = client.post("/authors/3/books", json={"title": "Desert Book", "description": "Sands all around"})
+    assert response.status_code == 404
+    assert response.get_json() == {"message": "Author 3 not found"}
+
+def test_create_book_with_invalid_author_id(client):
+    response = client.post("/authors/abc/books", json={"title": "Desert Book", "description": "Sands all around"})
+    assert response.status_code == 400
+    assert response.get_json() == {"message": "Author abc invalid"}
 
 def test_update_author(client, two_saved_authors):
     response = client.put("/authors/1", json={"name": "Alice Johnson"})

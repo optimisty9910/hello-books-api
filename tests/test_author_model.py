@@ -28,7 +28,7 @@ def test_to_dict_with_missing_id():
     author = Author(name="John Doe")
     author_dict = author.to_dict()
     assert len(author_dict) == 2
-    assert author_dict["id"] == None
+    assert author_dict["id"] is None
     assert author_dict["name"] == "John Doe"
 
 def test_to_dict_with_missing_name():
@@ -36,4 +36,4 @@ def test_to_dict_with_missing_name():
     author_dict = author.to_dict()
     assert len(author_dict) == 2
     assert author_dict["id"] == 1
-    assert author_dict["name"] == None
+    assert author_dict["name"] is None

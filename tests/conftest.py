@@ -5,6 +5,7 @@ from flask.signals import request_finished
 from dotenv import load_dotenv
 from app.models.author import Author
 from app.models.book import Book
+from app.models.genre import Genre
 import os
 
 load_dotenv()
@@ -48,4 +49,30 @@ def two_saved_authors(app):
     jane_smith = Author(name="Jane Smith")
 
     db.session.add_all([john_doe, jane_smith])
+    db.session.commit()
+
+@pytest.fixture
+def two_authors_with_two_books(app, two_saved_authors):
+    desert_book = Book(title="Desert Book", description="Sands all around", author_id=1)
+    plains_book = Book(title="Plains Book", description="Grasslands for milesr", author_id=2)
+
+    db.session.add_all([desert_book, plains_book])
+    db.session.commit()
+
+@pytest.fixture
+def two_saved_genres(app):
+    # Arrange
+    fiction_genre = Genre(name="Fiction")
+    non_fiction_genre = Genre(name="Non-Fiction")
+
+    db.session.add_all([fiction_genre, non_fiction_genre])
+    db.session.commit()
+    return [fiction_genre, non_fiction_genre]
+
+@pytest.fixture
+def two_genres_with_two_books(app, two_saved_genres):
+    sky_book = Book(title="SkyBook", description="Floating in the clouds", genres=[two_saved_genres[0]])
+    tundra_book = Book(title="Tundra Book", description="Like plains but colder", genres=[two_saved_genres[1]])
+
+    db.session.add_all([sky_book, tundra_book])
     db.session.commit()
